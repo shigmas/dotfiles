@@ -94,20 +94,18 @@ for candidate in `find . -name README.md -o -name go.mod -o -name \*.sh -o -name
             fi
             ;;
         *Dockerfile*)
-            #echo testing Dockerfile $candidate
-            # test for the FROM
-            resFrom=$(awk '/^FROM.*golang1\.[0-9]+\.[0-9]+/' "$candidate" | xargs)
+            resFrom=$(awk '/^FROM\s+.*golang:1\.[0-9]+/' "$candidate" | xargs)
             resVersion=$(awk '/GO_VERSION\s*=?\s*1\.[0-9]+\.[0-9]+/' "$candidate" | xargs)
-
             if [ "$resFrom" != "" ] ; then
-                yes_or_no found "$resFrom" in "$candidate". Replace with "$goVersion"
+                yes_or_no found "$resFrom" in "$candidate". Replace with "$goModVersion"
                 yesno=$?
                 if [ $yesno = 0 ] ; then
                     echo said yes. replacing
 
-                    sed -Ei s/^\(FROM.*golang:\)1\.[[:digit:]]\+\.[[:digit:]]\+\(.*\)/\\1"$expGoVersion"\\2/g "$candidate"
-                fi            
-            elif [ "$resVersion" != "" ] ; then
+                    sed -Ei s/^\(FROM[[:space:]]\+.*golang:\)1\.[[:digit:]]\+\(.*\)/\\1"$expGoModVersion"\\2/g "$candidate"
+                fi
+            fi
+            if [ "$resVersion" != "" ] ; then
                 yes_or_no found "$resVersion" in "$candidate". Replace with "$goVersion"
                 yesno=$?
                 if [ $yesno = 0 ] ; then
